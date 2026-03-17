@@ -2,6 +2,21 @@
 
 How Rehearse compares to existing tools in the executable specification and markdown testing space.
 
+## Summary
+
+| Tool | Category | Similar | Different |
+|---|---|---|---|
+| [Gauge](#gauge-thoughtworks) | Direct competitor | Markdown specs, no Gherkin, structured reporting, multi-step workflows | Requires fixture code in a host language; Rehearse executes code blocks directly |
+| [Concordion](#concordion) | Direct competitor | Markdown support, specs = docs, acceptance testing | Java-centric, commands via link syntax, requires Java fixtures |
+| [DaSpec](#daspec) | Direct competitor | Markdown-native, validates docs against software | JavaScript-only, small community, appears dormant |
+| [Silk](#silk) | Direct competitor | Markdown as test definition, clean format | API testing only — not general-purpose workflows |
+| [mdsh](#mdsh) | Code block executor | Runs shell blocks from markdown | No test reporting, no composition, no AC framework |
+| [txm](#txm-tests-ex-markdown) | Code block executor | Language-agnostic markdown code testing | Annotation-driven, no workflows, no structured reporting |
+| [MDX](#mdx-go) | Code block executor | Go-native, executes markdown code blocks | Early-stage, no test framework features |
+| [markdown-exec](#markdown-exec-python) | Code block executor | Executes code blocks in markdown | MkDocs plugin, not a test framework |
+| [Cucumber/Gherkin](#cucumber--gherkin) | BDD framework | Dominant BDD tool, structured scenarios | Custom DSL, not markdown, requires step definition glue code |
+| [FitNesse](#fitnesse) | BDD framework | Specs as tests, acceptance testing pioneer | Wiki format, table-driven, Java-centric, legacy |
+
 ## Direct Competitors
 
 ### Gauge (ThoughtWorks)
