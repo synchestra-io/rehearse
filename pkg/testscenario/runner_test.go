@@ -252,21 +252,15 @@ func TestRunner_HTTPStep(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	// Scenario with an http step that captures status and body via Outputs.
-	scenarioMD := "# Scenario: HTTP runner test\n\n**Description:** Tests HTTP step execution.\n\n## fetch\n\n**Outputs:**\n\n| Name | Store | Extract |\n|---|---|---|\n| resp_status | context | `echo \"$RESPONSE_STATUS\"` |\n| resp_body | context | `echo \"$RESPONSE_BODY\"` |\n\n```http\nGET " + srv.URL + "\n```\n"
+	// Scenario with an http step capturing status and body via Outputs, plus a bash step
+	// that asserts those context values — verifying RESPONSE_STATUS and RESPONSE_BODY
+	// env vars flow through extraEnv into extractOutput.
+	scenarioMD := "# Scenario: HTTP runner test\n\n**Description:** Tests HTTP step execution.\n\n## fetch\n\n**Outputs:**\n\n| Name | Store | Extract |\n|---|---|---|\n| resp_status | context | `echo \"$RESPONSE_STATUS\"` |\n| resp_body | context | `echo \"$RESPONSE_BODY\"` |\n\n```http\nGET " + srv.URL + "\n```\n" +
+		"\n## check-outputs\n\n**Depends on:** fetch\n\n```bash\ntest \"${{ context.resp_status }}\" = \"200\" || { echo \"bad status: ${{ context.resp_status }}\"; exit 1; }\necho \"${{ context.resp_body }}\" | grep -q \"hello from test server\" || { echo \"body mismatch\"; exit 1; }\n```\n"
 
 	s, err := ParseScenario([]byte(scenarioMD))
 	if err != nil {
 		t.Fatalf("parse error: %v", err)
-	}
-
-	// Add a second step that asserts the extracted context values to verify
-	// that RESPONSE_STATUS and RESPONSE_BODY env vars reach extractOutput.
-	scenarioMD += "\n## check-outputs\n\n**Depends on:** fetch\n\n```bash\ntest \"${{ context.resp_status }}\" = \"200\" || { echo \"bad status: ${{ context.resp_status }}\"; exit 1; }\necho \"${{ context.resp_body }}\" | grep -q \"hello from test server\" || { echo \"body mismatch\"; exit 1; }\n```\n"
-
-	s, err = ParseScenario([]byte(scenarioMD))
-	if err != nil {
-		t.Fatalf("parse error after adding check step: %v", err)
 	}
 
 	runner := NewRunner(RunnerConfig{})
