@@ -260,18 +260,32 @@ func TestRunner_HTTPStep(t *testing.T) {
 		t.Fatalf("parse error: %v", err)
 	}
 
+	// Add a second step that asserts the extracted context values to verify
+	// that RESPONSE_STATUS and RESPONSE_BODY env vars reach extractOutput.
+	scenarioMD += "\n## check-outputs\n\n**Depends on:** fetch\n\n```bash\ntest \"${{ context.resp_status }}\" = \"200\" || { echo \"bad status: ${{ context.resp_status }}\"; exit 1; }\necho \"${{ context.resp_body }}\" | grep -q \"hello from test server\" || { echo \"body mismatch\"; exit 1; }\n```\n"
+
+	s, err = ParseScenario([]byte(scenarioMD))
+	if err != nil {
+		t.Fatalf("parse error after adding check step: %v", err)
+	}
+
 	runner := NewRunner(RunnerConfig{})
 	result := runner.Run(s)
 
 	if !result.Passed {
 		t.Fatalf("scenario failed: %+v", result)
 	}
-	if len(result.StepResults) != 1 {
-		t.Fatalf("expected 1 step result, got %d", len(result.StepResults))
+	if len(result.StepResults) != 2 {
+		t.Fatalf("expected 2 step results, got %d", len(result.StepResults))
 	}
-	sr := result.StepResults[0]
-	if !sr.Passed {
-		t.Fatalf("step failed: %s", sr.Error)
+	if !result.StepResults[0].Passed {
+		t.Fatalf("fetch step failed: %s", result.StepResults[0].Error)
+	}
+	if result.StepResults[0].Stdout != "hello from test server" {
+		t.Errorf("expected Stdout='hello from test server', got %q", result.StepResults[0].Stdout)
+	}
+	if !result.StepResults[1].Passed {
+		t.Fatalf("check-outputs step failed: %s", result.StepResults[1].Error)
 	}
 }
 

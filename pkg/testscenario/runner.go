@@ -240,6 +240,7 @@ func (r *Runner) runStep(step Step, ctx *ExecContext) StepResult {
 			return sr
 		}
 		stdout = httpResult.Body
+		sr.Stdout = httpResult.Body
 		extraEnv = httpResult.Env()
 		// Store response in context (unless Outputs table is present — spec: auto-store suppressed when outputs declared).
 		// ctx.StoreOutput stores value under contextVars[name] directly (name used as-is as map key),
