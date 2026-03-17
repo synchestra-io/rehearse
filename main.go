@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/synchestra-io/rehearse/cli"
+	"github.com/synchestra-io/rehearse/pkg/cli"
 )
 
 func main() {
