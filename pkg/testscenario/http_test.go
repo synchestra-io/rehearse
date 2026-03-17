@@ -91,6 +91,27 @@ func TestExecHTTPRequest_NetworkError(t *testing.T) {
 	}
 }
 
+// TestHTTPResult_Env_NewlineBody documents the known limitation: a body containing
+// newlines produces a multi-line env entry that will be truncated at the first newline
+// by the OS env-var parser. This test pins the current behaviour so any future change
+// to Env() is caught explicitly.
+func TestHTTPResult_Env_NewlineBody(t *testing.T) {
+	r := HTTPResult{Status: 200, Body: "line1\nline2"}
+	env := r.Env()
+	// Find the RESPONSE_BODY entry.
+	var bodyEntry string
+	for _, e := range env {
+		if strings.HasPrefix(e, "RESPONSE_BODY=") {
+			bodyEntry = e
+			break
+		}
+	}
+	// Current behaviour: the entry contains the literal newline, making it multi-line.
+	if !strings.Contains(bodyEntry, "\n") {
+		t.Errorf("expected RESPONSE_BODY entry to contain newline for body with newline, got %q", bodyEntry)
+	}
+}
+
 func TestHTTPResult_Env(t *testing.T) {
 	r := HTTPResult{
 		Status:     200,

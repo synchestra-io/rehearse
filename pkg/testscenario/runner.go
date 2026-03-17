@@ -241,6 +241,8 @@ func (r *Runner) runStep(step Step, ctx *ExecContext) StepResult {
 		}
 		stdout = httpResult.Body
 		sr.Stdout = httpResult.Body
+		// sr.ExitCode is intentionally left at 0: HTTP steps do not have a process exit
+		// code. Non-2xx responses are valid results, not errors — assertions check status.
 		extraEnv = httpResult.Env()
 		// Store response in context (unless Outputs table is present — spec: auto-store suppressed when outputs declared).
 		// ctx.StoreOutput stores value under contextVars[name] directly (name used as-is as map key),
