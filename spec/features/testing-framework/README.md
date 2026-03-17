@@ -10,16 +10,21 @@ Rehearse's testing framework turns specifications into executable verification �
 
 | Directory | Description |
 |---|---|
-| [test-scenario](test-scenario/README.md) | The markdown scenario format: steps, outputs, AC references, includes |
+| [test-scenario](test-scenario/README.md) | The markdown scenario format: steps, outputs, AC references, includes, and inline assertions |
 | [test-runner](test-runner/README.md) | The Go execution engine: parsing, AC resolution, shell execution, reporting |
+| [http-requests](http-requests/README.md) | HTTP(S) request code blocks: RFC 7230 format, variable substitution, response context storage |
 
 ### test-scenario
 
-Defines the markdown scenario format — a human-readable `.md` file with named steps, dependency declarations, input/output passing, AC references, and sub-flow includes. Steps execute sequentially by default with opt-in parallel groups. Every scenario doubles as documentation: a product owner reads the step descriptions; the runner executes the bash blocks. Same file, two audiences.
+Defines the markdown scenario format — a human-readable `.md` file with named steps, dependency declarations, input/output passing, AC references, sub-flow includes, and inline assertions. Steps execute sequentially by default with opt-in parallel groups. Every scenario doubles as documentation: a product owner reads the step descriptions; the runner executes the bash blocks. Same file, two audiences.
 
 ### test-runner
 
-The execution engine that brings scenarios to life. Parses scenario markdown, resolves AC verification scripts from feature `_acs/` directories, executes bash steps, and produces structured pass/fail reports for both humans and CI. Self-contained Go package (`pkg/testscenario/`) with no framework-specific dependencies — give it a spec root path and it handles the rest.
+The execution engine that brings scenarios to life. Parses scenario markdown, resolves AC verification scripts from feature `_acs/` directories, executes bash steps, HTTP requests, and inline assertions, and produces structured pass/fail reports for both humans and CI. Self-contained Go package (`pkg/testscenario/`) with no framework-specific dependencies — give it a spec root path and it handles the rest.
+
+### http-requests
+
+First-class HTTP(S) support for scenarios. Declare requests in RFC 7230 format (the same `.http` standard used by JetBrains HTTP Client and VS Code REST Client). Context and environment variables are substituted before the request is sent. The response lands in context automatically — status, headers, body, and parsed JSON — available to inline assertions and subsequent steps.
 
 ## Problem
 
@@ -115,6 +120,7 @@ See the [test runner's Running the Self-Tests section](test-runner/README.md#run
 |---|---|
 | [Acceptance Criteria](../acceptance-criteria/README.md) | ACs are the atomic verification units that scenarios compose. The runner resolves and executes their verification scripts. |
 | [CLI](../cli/README.md) | `rehearse run` and `rehearse list` commands. |
+| [HTTP Requests](http-requests/README.md) | Sub-feature defining the `http` code block type. HTTP steps integrate with the output model, inline assertions, and AC verification. |
 
 ## Acceptance Criteria
 

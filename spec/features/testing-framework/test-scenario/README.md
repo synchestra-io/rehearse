@@ -103,7 +103,8 @@ Each step is an `## {step-name}` heading. Steps contain a mix of optional metada
 | Outputs | No | Table with Name, Store, and Extract columns |
 | ACs | No | Table with Feature and ACs columns — links to [acceptance criteria](../../acceptance-criteria/README.md) to verify after this step |
 | Include | No | Delegates to a sub-flow `.md` file (mutually exclusive with code block) |
-| Code block | Conditional | Script to execute (required unless Include is specified). Supports `bash`, `python`, `sql`, and `starlark` — see [Supported languages](../../acceptance-criteria/README.md#supported-languages). |
+| Code block | Conditional | Script to execute (required unless Include is specified). Supports `bash`, `python`, `sql`, `starlark`, and `http` — see [Supported languages](../../acceptance-criteria/README.md#supported-languages) and [HTTP Requests](../http-requests/README.md). |
+| Assertions | No | One or more inline assertion code blocks following `**Assertions:**`. Each block is an independent assertion that runs after the step's code block. See [Inline assertions](#inline-assertions). |
 
 A step with neither a code block nor an Include directive is a validation error — every step must do something. The code block's language annotation is **mandatory** — a code block without an annotation (e.g., bare `` ``` `` instead of `` ```bash ``) is a validation error. This ensures every script's interpreter is explicit and unambiguous.
 
@@ -177,6 +178,54 @@ Steps declare which acceptance criteria to verify after execution:
 
 The runner parses only the first two columns (Feature, ACs). Additional columns are allowed for human-readable notes — the runner ignores them. This lets scenario authors annotate without breaking execution.
 
+### Inline assertions
+
+A step can declare inline assertions — code blocks that run immediately after the step's main code block and must all pass for the step to succeed. Assertions are declared with the `**Assertions:**` metadata key followed by one or more fenced code blocks:
+
+```markdown
+## create-user
+
+```http
+POST https://api.example.com/users
+Content-Type: application/json
+
+{"name": "Alice", "email": "alice@example.com"}
+```
+
+**Assertions:**
+
+```bash
+test "$RESPONSE_STATUS" = "201"
+```
+
+```python
+import json
+body = json.loads("""$RESPONSE_BODY""")
+assert body["name"] == "Alice"
+assert "id" in body
+```
+```
+
+**Key properties:**
+
+- **Language-independent.** Each assertion block carries its own language annotation. A step that makes an HTTP call can have one bash assertion checking the status code and a Python assertion parsing the JSON body — both are valid.
+- **Independent execution.** Each assertion code block runs as a separate script. All assertions run regardless of whether earlier ones fail. This gives a complete picture of failures rather than stopping at the first failed check.
+- **Same language support.** Assertions support the same languages as main step code blocks: `bash`, `python`, `sql`, `starlark`, and `http` is not valid in assertions (an assertion cannot itself make an HTTP request).
+- **Same variable access.** Assertions have access to all context variables (`${{ context.var }}`), environment variables, and the step's execution environment variables (`$STEP_STDOUT`, `$STEP_STDERR`, `$STEP_EXIT_CODE`, `$RESPONSE_STATUS`, `$RESPONSE_BODY`, `$RESPONSE_HEADERS_*`).
+- **Ordered reporting.** Assertion results are reported in declaration order as sub-items of the step. A step with three assertions and one failure reports as: step → assertion 1 ✓ → assertion 2 ✗ → assertion 3 ✓.
+- **Step outcome.** A step fails if any assertion fails, even if the main code block succeeded.
+
+**Assertions vs. ACs:**
+
+| | Inline assertions | Acceptance criteria (ACs) |
+|---|---|---|
+| Location | Embedded in the scenario step | Separate `_acs/*.md` file |
+| Reusability | Single scenario only | Referenced by any number of scenarios |
+| Best for | One-off checks specific to this step | Shared verification logic used across multiple scenarios |
+| Authoring overhead | Zero — write inline | Requires creating and naming an AC file |
+
+Use inline assertions for checks that are specific to a particular scenario step and have no reuse value. Use ACs when the same verification logic appears in multiple places or when the assertion is the formal spec of a feature's behavior.
+
 ### Include (sub-flows)
 
 A step can delegate its work to a separate scenario file:
@@ -200,7 +249,8 @@ Sub-flows live in `spec/tests/flows/` for cross-feature reuse, or `spec/features
 | Feature | Interaction |
 |---|---|
 | [Acceptance Criteria](../../acceptance-criteria/README.md) | Scenarios reference ACs via table syntax. AC verification scripts are the atomic assertions that scenarios compose. |
-| [Test Runner](../test-runner/README.md) | The runner parses scenario files, resolves AC references, executes steps, and produces structured reports. |
+| [HTTP Requests](../http-requests/README.md) | The `http` code block type is a first-class step language. HTTP steps populate response environment variables consumed by inline assertions and AC verification scripts. |
+| [Test Runner](../test-runner/README.md) | The runner parses scenario files, resolves AC references, executes steps and assertions, and produces structured reports. |
 | [Testing Framework](../README.md) | Parent feature — defines file locations, CLI commands, and design principles. |
 
 ## Acceptance Criteria
@@ -213,3 +263,4 @@ Not defined yet.
 - Should scenarios support conditional steps (skip-if / run-if based on output values) for handling platform-specific or environment-specific test paths?
 - Should there be a maximum nesting depth for includes to prevent overly complex test hierarchies?
 - Should step timeouts be configurable per-step via a `**Timeout:**` metadata field, or only at the framework level?
+- Should inline assertion failures be reported as individual step sub-items, or as a collapsed summary showing only the count of passed/failed assertions?
