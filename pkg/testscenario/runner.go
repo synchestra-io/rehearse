@@ -225,25 +225,52 @@ func (r *Runner) runStep(step Step, ctx *ExecContext) StepResult {
 		return sr
 	}
 
-	// Execute the step script.
-	stdout, stderr, exitCode, err := execScript(step.Language, code, ctx.ContextVarsAsEnv())
-	sr.Stdout = stdout
-	sr.Stderr = stderr
-	sr.ExitCode = exitCode
-	if err != nil {
-		sr.Passed = false
-		sr.Error = err.Error()
-		sr.Duration = time.Since(stepStart)
-		return sr
-	}
-	if exitCode != 0 {
-		sr.Passed = false
-		sr.Error = fmt.Sprintf("exit code %d", exitCode)
+	// Execute the step.
+	var stdout, stderr string
+	var exitCode int
+	var extraEnv []string
+
+	if step.Language == "http" {
+		httpResult, httpErr := execHTTPRequest(code)
+		if httpErr != nil {
+			sr.Passed = false
+			sr.Error = fmt.Sprintf("http request failed: %v", httpErr)
+			sr.Duration = time.Since(stepStart)
+			r.notify(func(p ProgressReporter) { p.StepFinished(sr) })
+			return sr
+		}
+		stdout = httpResult.Body
+		extraEnv = httpResult.Env()
+		// Store response in context (unless Outputs table is present — spec: auto-store suppressed when outputs declared).
+		// ctx.StoreOutput stores value under contextVars[name] directly (name used as-is as map key),
+		// so "response.status" becomes accessible as ${{ context.response.status }}.
+		if len(step.Outputs) == 0 {
+			for k, v := range httpResult.ContextVars() {
+				_ = ctx.StoreOutput(step.Name, k, v, StoreContext)
+			}
+		}
+	} else {
+		var execErr error
+		stdout, stderr, exitCode, execErr = execScript(step.Language, code, ctx.ContextVarsAsEnv())
+		sr.Stdout = stdout
+		sr.Stderr = stderr
+		sr.ExitCode = exitCode
+		if execErr != nil {
+			sr.Passed = false
+			sr.Error = execErr.Error()
+			sr.Duration = time.Since(stepStart)
+			r.notify(func(p ProgressReporter) { p.StepFinished(sr) })
+			return sr
+		}
+		if exitCode != 0 {
+			sr.Passed = false
+			sr.Error = fmt.Sprintf("exit code %d", exitCode)
+		}
 	}
 
 	// Extract outputs.
 	for _, output := range step.Outputs {
-		outVal, err := r.extractOutput(output, ctx, stdout, stderr, exitCode)
+		outVal, err := r.extractOutput(output, ctx, stdout, stderr, exitCode, extraEnv)
 		if err != nil {
 			sr.Passed = false
 			sr.Error = fmt.Sprintf("extracting output %q: %v", output.Name, err)
@@ -269,7 +296,7 @@ func (r *Runner) runStep(step Step, ctx *ExecContext) StepResult {
 		}
 		for _, ac := range acs {
 			r.notify(func(p ProgressReporter) { p.ACStarted(ac.FeaturePath, ac.Slug) })
-			acResult := r.verifyAC(ac, ctx, stdout, stderr, exitCode)
+			acResult := r.verifyAC(ac, ctx, stdout, stderr, exitCode, extraEnv)
 			sr.ACResults = append(sr.ACResults, acResult)
 			r.notify(func(p ProgressReporter) { p.ACFinished(acResult) })
 			if !acResult.Passed {
@@ -286,7 +313,7 @@ func (r *Runner) runStep(step Step, ctx *ExecContext) StepResult {
 // extractOutput runs the extract expression and returns the captured value.
 // STEP_STDOUT and STEP_STDERR are written to temp files so extract expressions
 // can use them as file paths (e.g., `cat $STEP_STDOUT`).
-func (r *Runner) extractOutput(output Output, ctx *ExecContext, stdout, stderr string, exitCode int) (string, error) {
+func (r *Runner) extractOutput(output Output, ctx *ExecContext, stdout, stderr string, exitCode int, extraEnv []string) (string, error) {
 	stdoutFile, err := writeTempFile("step-stdout-*", stdout)
 	if err != nil {
 		return "", fmt.Errorf("creating stdout temp file: %w", err)
@@ -305,6 +332,7 @@ func (r *Runner) extractOutput(output Output, ctx *ExecContext, stdout, stderr s
 		"STEP_STDERR="+stderrFile,
 		fmt.Sprintf("STEP_EXIT_CODE=%d", exitCode),
 	)
+	env = append(env, extraEnv...)
 
 	val, _, extractExitCode, err := execScript("bash", output.Extract, env)
 	if err != nil {
@@ -318,7 +346,7 @@ func (r *Runner) extractOutput(output Output, ctx *ExecContext, stdout, stderr s
 
 // verifyAC runs an AC verification script and returns the result.
 // STEP_STDOUT and STEP_STDERR are written to temp files for consistency with extractOutput.
-func (r *Runner) verifyAC(ac ACFile, ctx *ExecContext, stdout, stderr string, exitCode int) ACResult {
+func (r *Runner) verifyAC(ac ACFile, ctx *ExecContext, stdout, stderr string, exitCode int, extraEnv []string) ACResult {
 	acr := ACResult{
 		FeaturePath: ac.FeaturePath,
 		ACSlug:      ac.Slug,
@@ -374,6 +402,7 @@ func (r *Runner) verifyAC(ac ACFile, ctx *ExecContext, stdout, stderr string, ex
 		"STEP_STDERR="+stderrFile,
 		fmt.Sprintf("STEP_EXIT_CODE=%d", exitCode),
 	)
+	env = append(env, extraEnv...)
 
 	_, verifyStderr, verifyExitCode, err := execScript(ac.Language, ac.Verification, env)
 	if err != nil {

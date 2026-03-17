@@ -2,6 +2,8 @@ package testscenario
 
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -239,6 +241,37 @@ echo "$MISSING_VAR"
 	}
 	if acr.Error == "" {
 		t.Error("expected error message about missing input")
+	}
+}
+
+func TestRunner_HTTPStep(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(200)
+		_, _ = w.Write([]byte("hello from test server"))
+	}))
+	defer srv.Close()
+
+	// Scenario with an http step that captures status and body via Outputs.
+	scenarioMD := "# Scenario: HTTP runner test\n\n**Description:** Tests HTTP step execution.\n\n## fetch\n\n**Outputs:**\n\n| Name | Store | Extract |\n|---|---|---|\n| resp_status | context | `echo \"$RESPONSE_STATUS\"` |\n| resp_body | context | `echo \"$RESPONSE_BODY\"` |\n\n```http\nGET " + srv.URL + "\n```\n"
+
+	s, err := ParseScenario([]byte(scenarioMD))
+	if err != nil {
+		t.Fatalf("parse error: %v", err)
+	}
+
+	runner := NewRunner(RunnerConfig{})
+	result := runner.Run(s)
+
+	if !result.Passed {
+		t.Fatalf("scenario failed: %+v", result)
+	}
+	if len(result.StepResults) != 1 {
+		t.Fatalf("expected 1 step result, got %d", len(result.StepResults))
+	}
+	sr := result.StepResults[0]
+	if !sr.Passed {
+		t.Fatalf("step failed: %s", sr.Error)
 	}
 }
 
