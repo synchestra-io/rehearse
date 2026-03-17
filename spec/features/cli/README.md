@@ -42,7 +42,6 @@ rehearse run --tag e2e               — filter by tag
 rehearse run --format json           — machine-readable output
 rehearse run --run-manual-tests      — include scenarios tagged 'manual'
 rehearse run --spec-root ./my-spec   — override spec root directory
-rehearse run --fail-fast             — stop on first failure
 ```
 
 | Flag | Default | Description |
@@ -51,7 +50,6 @@ rehearse run --fail-fast             — stop on first failure
 | `--spec-root` | `spec` | Override the spec root directory for AC resolution |
 | `--tag` | | Filter scenarios by tag (repeatable) |
 | `--run-manual-tests` | `false` | Include scenarios tagged `manual` in directory scans |
-| `--fail-fast` | `false` | Stop execution on first step failure |
 
 When no path is given, defaults to scanning the current directory.
 
@@ -63,7 +61,6 @@ Lists available scenarios without executing them.
 
 ```
 rehearse list              — list all scenarios in current directory
-rehearse list [path]       — list scenarios in specified directory
 rehearse list --tag e2e    — list filtered by tag
 ```
 

@@ -89,7 +89,7 @@ graph TD
      a. Resolve `${{ context.* }}` and `${{ steps.*.outputs.* }}` references in the code block
      b. Execute via the appropriate interpreter based on the code block's language annotation (bash, python, starlark — see [Supported languages](../../acceptance-criteria/README.md#supported-languages))
      c. Capture stdout, stderr, exit code
-     d. If exit code != 0, mark step as failed (continue unless `--fail-fast`)
+     d. If exit code != 0, mark step as failed and continue to next step
      e. Extract declared outputs and store to context and/or step scope
      f. Resolve AC references → locate AC files → extract verification scripts
      g. Execute each verification script with context + step outputs as env vars
@@ -162,7 +162,7 @@ The runner handles errors predictably — no silent swallowing, no ambiguous sta
 | Parse error | Fail before execution, report file path and line number |
 | Missing language annotation | Fail at parse time — code blocks must specify `bash`, `python`, `sql`, or `starlark` |
 | Setup failure | Skip all steps, run Teardown, report failure |
-| Step failure | Record failure, continue to next step (stop if `--fail-fast`) |
+| Step failure | Record failure, continue to next step |
 | AC failure | Record per-AC failure, mark the containing step as failed |
 | Teardown failure | Report as warning, do not mask step results |
 | Include cycle | Fail at validation (before any execution) |
