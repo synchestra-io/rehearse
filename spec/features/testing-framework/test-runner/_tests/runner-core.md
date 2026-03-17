@@ -382,6 +382,36 @@ test $fail_rc -ne 0 || { echo "Expected non-zero for failing"; exit 1; }
 echo "Exit codes correct: pass=$pass_rc, fail=$fail_rc"
 ````
 
+## http-get-example
+
+**Outputs:**
+
+| Name | Store | Extract |
+|---|---|---|
+| example_content_type | context | `echo "$RESPONSE_HEADERS_CONTENT_TYPE"` |
+| example_body | context | `echo "$RESPONSE_BODY"` |
+
+```http
+GET https://example.com/
+Accept: text/html
+```
+
+## assert-http-response
+
+**Depends on:** http-get-example
+
+````bash
+echo "${{ context.example_content_type }}" | grep -qi "text/html" || {
+  echo "Expected Content-Type to contain text/html, got: ${{ context.example_content_type }}"
+  exit 1
+}
+echo "${{ context.example_body }}" | grep -q "This domain is for use in documentation examples without needing permission." || {
+  echo "Expected body fragment not found"
+  exit 1
+}
+echo "HTTP assertions passed: content-type=${{ context.example_content_type }}"
+````
+
 ## Teardown
 
 ```bash
