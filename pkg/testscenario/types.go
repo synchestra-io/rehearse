@@ -34,7 +34,7 @@ type Step struct {
 	ACs       []ACRef
 	Include   string // path to sub-flow .md file, empty if inline code
 	Code      string // code block content, empty if include
-	Language  string // code block language annotation: "bash", "python", "sql", or "starlark"
+	Language  string // code block language annotation: "bash", "python", "sql", "starlark", or "http"
 }
 
 // Scenario is a parsed test scenario.

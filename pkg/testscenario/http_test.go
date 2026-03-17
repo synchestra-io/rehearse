@@ -96,7 +96,7 @@ func TestHTTPResult_Env(t *testing.T) {
 		Status:     200,
 		StatusText: "OK",
 		Headers:    map[string]string{"content-type": "text/html; charset=utf-8"},
-		Body:       "hello",
+		Body:       "a=b",
 	}
 	env := r.Env()
 	envMap := make(map[string]string)
@@ -107,8 +107,8 @@ func TestHTTPResult_Env(t *testing.T) {
 	if envMap["RESPONSE_STATUS"] != "200" {
 		t.Errorf("expected RESPONSE_STATUS=200, got %q", envMap["RESPONSE_STATUS"])
 	}
-	if envMap["RESPONSE_BODY"] != "hello" {
-		t.Errorf("expected RESPONSE_BODY=hello, got %q", envMap["RESPONSE_BODY"])
+	if envMap["RESPONSE_BODY"] != "a=b" {
+		t.Errorf("expected RESPONSE_BODY=a=b, got %q", envMap["RESPONSE_BODY"])
 	}
 	if envMap["RESPONSE_HEADERS_CONTENT_TYPE"] != "text/html; charset=utf-8" {
 		t.Errorf("wrong RESPONSE_HEADERS_CONTENT_TYPE: %q", envMap["RESPONSE_HEADERS_CONTENT_TYPE"])

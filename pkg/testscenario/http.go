@@ -5,7 +5,12 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
+
+// httpClient is the HTTP client used for executing http block requests.
+// A 30-second timeout prevents hung servers from blocking the test runner indefinitely.
+var httpClient = &http.Client{Timeout: 30 * time.Second}
 
 // HTTPResult holds the outcome of an HTTP request.
 type HTTPResult struct {
@@ -17,6 +22,9 @@ type HTTPResult struct {
 
 // Env returns HTTP response as RESPONSE_* environment variable pairs.
 // RESPONSE_STATUS, RESPONSE_BODY, and RESPONSE_HEADERS_<UPPERCASED_NAME> are set.
+// NOTE: values containing newlines produce multi-line env entries, which are silently
+// dropped by some OS/shell implementations. This mirrors the existing ContextVarsAsEnv
+// behaviour in this package.
 func (r HTTPResult) Env() []string {
 	env := []string{
 		fmt.Sprintf("RESPONSE_STATUS=%d", r.Status),
@@ -113,7 +121,7 @@ func execHTTPRequest(code string) (HTTPResult, error) {
 		req.Header.Set(name, val)
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return HTTPResult{}, fmt.Errorf("executing request: %w", err)
 	}
