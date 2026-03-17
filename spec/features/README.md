@@ -7,7 +7,7 @@ Feature specifications for the Rehearse test framework, managed by [Synchestra](
 | Feature | Status | Description |
 |---|---|---|
 | [testing-framework](testing-framework/README.md) | Conceptual | Markdown-native testing framework: scenario format, Go-based runner, and CLI integration for composing ACs into E2E and integration test flows |
-| [acceptance-criteria](acceptance-criteria/README.md) | Conceptual | First-class, individually addressable verification artifacts — full specification in [synchestra-io/synchestra](https://github.com/synchestra-io/synchestra/blob/main/spec/features/acceptance-criteria/) |
+| [acceptance-criteria](acceptance-criteria/README.md) | Conceptual | First-class, individually addressable verification artifacts with status lifecycle, typed inputs, and executable verification scripts |
 | [cli](cli/README.md) | In Progress | The `rehearse` CLI — primary interface for running and listing test scenarios |
 
 ## Feature Summaries
@@ -18,7 +18,7 @@ Turns specifications into executable verification — without leaving markdown. 
 
 ### [Acceptance Criteria](acceptance-criteria/README.md)
 
-The contract between what a feature promises and what the system delivers. Each AC is a standalone markdown file — readable by product owners, auditable by reviewers, executable by the test runner. This is a proxy feature — the full specification lives in the [synchestra-io/synchestra](https://github.com/synchestra-io/synchestra/blob/main/spec/features/acceptance-criteria/) repository.
+The contract between what a feature promises and what the system delivers. Each AC is a standalone markdown file — readable by product owners, auditable by reviewers, executable by the test runner. Defines the AC file format, supported verification languages (Bash, Python, SQL, Starlark), status lifecycle, identification scheme, and validation rules.
 
 ### [CLI](cli/README.md)
 

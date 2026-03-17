@@ -4,7 +4,7 @@
 
 ## Summary
 
-The test runner is the engine that turns [test scenarios](../test-scenario/README.md) from readable documentation into executable verification. It parses scenario markdown, resolves [acceptance criteria](https://github.com/synchestra-io/synchestra/blob/main/spec/features/acceptance-criteria/) from feature `_acs/` directories, executes bash steps (sequentially or in parallel groups), and produces structured pass/fail reports for both terminal output and CI pipelines. The runner is self-contained — give it a spec root path and a scenario file, and it handles discovery, resolution, execution, and reporting with no external dependencies.
+The test runner is the engine that turns [test scenarios](../test-scenario/README.md) from readable documentation into executable verification. It parses scenario markdown, resolves [acceptance criteria](../../acceptance-criteria/README.md) from feature `_acs/` directories, executes bash steps (sequentially or in parallel groups), and produces structured pass/fail reports for both terminal output and CI pipelines. The runner is self-contained — give it a spec root path and a scenario file, and it handles discovery, resolution, execution, and reporting with no external dependencies.
 
 ## Problem
 
@@ -87,7 +87,7 @@ graph TD
    - **Parallel groups:** consecutive `Parallel: true` steps launch as goroutines; the runner waits for all to complete before continuing
    - For each step:
      a. Resolve `${{ context.* }}` and `${{ steps.*.outputs.* }}` references in the code block
-     b. Execute via the appropriate interpreter based on the code block's language annotation (bash, python, starlark — see [Supported languages](https://github.com/synchestra-io/synchestra/blob/main/spec/features/acceptance-criteria/README.md#supported-languages))
+     b. Execute via the appropriate interpreter based on the code block's language annotation (bash, python, starlark — see [Supported languages](../../acceptance-criteria/README.md#supported-languages))
      c. Capture stdout, stderr, exit code
      d. If exit code != 0, mark step as failed (continue unless `--fail-fast`)
      e. Extract declared outputs and store to context and/or step scope
@@ -176,7 +176,7 @@ The principle: **failures are precise**. A step failure does not prevent Teardow
 | Feature | Interaction |
 |---|---|
 | [Test Scenario](../test-scenario/README.md) | The runner parses and executes the scenario format defined by this sibling feature. |
-| [Acceptance Criteria](https://github.com/synchestra-io/synchestra/blob/main/spec/features/acceptance-criteria/) | The runner resolves AC files from `_acs/` directories and executes their verification scripts. |
+| [Acceptance Criteria](../../acceptance-criteria/README.md) | The runner resolves AC files from `_acs/` directories and executes their verification scripts. |
 | [Testing Framework](../README.md) | Parent feature — defines CLI commands that invoke the runner. |
 | [CLI](../../cli/README.md) | `rehearse run` and `rehearse list` wire the runner to the CLI command tree. |
 

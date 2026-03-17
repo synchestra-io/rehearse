@@ -4,7 +4,7 @@
 
 ## Summary
 
-A test scenario is a markdown file that reads like a step-by-step guide and executes like a test suite. Each scenario composes [acceptance criteria](https://github.com/synchestra-io/synchestra/blob/main/spec/features/acceptance-criteria/) into multi-step workflows with named steps, data flowing between them, and structured pass/fail reporting. The format requires no special tooling to read — it renders natively on GitHub, in any markdown editor, and in any documentation viewer. The [test runner](../test-runner/README.md) executes it.
+A test scenario is a markdown file that reads like a step-by-step guide and executes like a test suite. Each scenario composes [acceptance criteria](../../acceptance-criteria/README.md) into multi-step workflows with named steps, data flowing between them, and structured pass/fail reporting. The format requires no special tooling to read — it renders natively on GitHub, in any markdown editor, and in any documentation viewer. The [test runner](../test-runner/README.md) executes it.
 
 ## Problem
 
@@ -101,9 +101,9 @@ Each step is an `## {step-name}` heading. Steps contain a mix of optional metada
 | Parallel | No | `true` to run this step concurrently with adjacent parallel steps |
 | Inputs | No | Table declaring required context/step variables |
 | Outputs | No | Table with Name, Store, and Extract columns |
-| ACs | No | Table with Feature and ACs columns — links to [acceptance criteria](https://github.com/synchestra-io/synchestra/blob/main/spec/features/acceptance-criteria/) to verify after this step |
+| ACs | No | Table with Feature and ACs columns — links to [acceptance criteria](../../acceptance-criteria/README.md) to verify after this step |
 | Include | No | Delegates to a sub-flow `.md` file (mutually exclusive with code block) |
-| Code block | Conditional | Script to execute (required unless Include is specified). Supports `bash`, `python`, `sql`, and `starlark` — see [Supported languages](https://github.com/synchestra-io/synchestra/blob/main/spec/features/acceptance-criteria/README.md#supported-languages). |
+| Code block | Conditional | Script to execute (required unless Include is specified). Supports `bash`, `python`, `sql`, and `starlark` — see [Supported languages](../../acceptance-criteria/README.md#supported-languages). |
 
 A step with neither a code block nor an Include directive is a validation error — every step must do something. The code block's language annotation is **mandatory** — a code block without an annotation (e.g., bare `` ``` `` instead of `` ```bash ``) is a validation error. This ensures every script's interpreter is explicit and unambiguous.
 
@@ -199,7 +199,7 @@ Sub-flows live in `spec/tests/flows/` for cross-feature reuse, or `spec/features
 
 | Feature | Interaction |
 |---|---|
-| [Acceptance Criteria](https://github.com/synchestra-io/synchestra/blob/main/spec/features/acceptance-criteria/) | Scenarios reference ACs via table syntax. AC verification scripts are the atomic assertions that scenarios compose. |
+| [Acceptance Criteria](../../acceptance-criteria/README.md) | Scenarios reference ACs via table syntax. AC verification scripts are the atomic assertions that scenarios compose. |
 | [Test Runner](../test-runner/README.md) | The runner parses scenario files, resolves AC references, executes steps, and produces structured reports. |
 | [Testing Framework](../README.md) | Parent feature — defines file locations, CLI commands, and design principles. |
 

@@ -4,7 +4,7 @@
 
 ## Summary
 
-Rehearse's testing framework turns specifications into executable verification — without leaving markdown. [Acceptance criteria](https://github.com/synchestra-io/synchestra/blob/main/spec/features/acceptance-criteria/) define what "correct" means for each feature. Test scenarios compose those criteria into multi-step workflows. The runner executes everything and reports results. The entire pipeline — from AC definition to test execution — lives in the spec repository, version-controlled alongside the features it verifies. No external test infrastructure. No language coupling. No gap between what the spec says and what the tests check.
+Rehearse's testing framework turns specifications into executable verification — without leaving markdown. [Acceptance criteria](../acceptance-criteria/README.md) define what "correct" means for each feature. Test scenarios compose those criteria into multi-step workflows. The runner executes everything and reports results. The entire pipeline — from AC definition to test execution — lives in the spec repository, version-controlled alongside the features it verifies. No external test infrastructure. No language coupling. No gap between what the spec says and what the tests check.
 
 ## Contents
 
@@ -23,7 +23,7 @@ The execution engine that brings scenarios to life. Parses scenario markdown, re
 
 ## Problem
 
-Individual [acceptance criteria](https://github.com/synchestra-io/synchestra/blob/main/spec/features/acceptance-criteria/) answer "does this one thing work?" But real-world verification requires answering a harder question: **"does the whole workflow work, end to end?"**
+Individual [acceptance criteria](../acceptance-criteria/README.md) answer "does this one thing work?" But real-world verification requires answering a harder question: **"does the whole workflow work, end to end?"**
 
 - **No integration harness.** Go unit tests validate package-level behavior. But nobody tests the compiled CLI binary through a realistic workflow: run a scenario, verify outputs, check AC resolution, clean up. That requires orchestration across steps, not assertions on function return values.
 - **ACs exist in isolation.** An AC like `creates-spec-config` can verify that a config file was written. But it cannot, by itself, verify that the file is still correct after three more CLI commands modify the project. Verification that crosses feature boundaries needs a way to compose ACs into ordered sequences with data flowing between steps.
@@ -107,7 +107,7 @@ The key insight: **Gherkin separates what from how** (Given/When/Then is the "wh
 
 | Feature | Interaction |
 |---|---|
-| [Acceptance Criteria](https://github.com/synchestra-io/synchestra/blob/main/spec/features/acceptance-criteria/) | ACs are the atomic verification units that scenarios compose. The runner resolves and executes their verification scripts. |
+| [Acceptance Criteria](../acceptance-criteria/README.md) | ACs are the atomic verification units that scenarios compose. The runner resolves and executes their verification scripts. |
 | [CLI](../cli/README.md) | `rehearse run` and `rehearse list` commands. |
 
 ## Acceptance Criteria
