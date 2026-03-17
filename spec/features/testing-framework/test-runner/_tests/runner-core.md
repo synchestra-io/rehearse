@@ -384,6 +384,8 @@ echo "Exit codes correct: pass=$pass_rc, fail=$fail_rc"
 
 ## http-get-example
 
+**Depends on:** test-exit-codes
+
 **Outputs:**
 
 | Name | Store | Extract |
@@ -405,6 +407,7 @@ echo "${{ context.example_content_type }}" | grep -qi "text/html" || {
   echo "Expected Content-Type to contain text/html, got: ${{ context.example_content_type }}"
   exit 1
 }
+# note: body text from IANA's example.com page; may change if IANA updates the copy
 echo "${{ context.example_body }}" | grep -q "This domain is for use in documentation examples without needing permission." || {
   echo "Expected body fragment not found"
   exit 1
