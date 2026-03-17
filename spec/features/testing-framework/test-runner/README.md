@@ -189,6 +189,52 @@ The test runner tests itself. The feature-scoped test scenarios in `_tests/` are
 
 If the runner can successfully parse and execute a scenario that tests its own parsing and execution, that is direct, non-circular evidence of correctness. The Go unit tests remain as the safety net; the dogfood scenario is the confidence multiplier.
 
+## Running the Self-Tests
+
+The runner's dogfood scenario lives at `spec/features/testing-framework/test-runner/_tests/runner-core.md`. It exercises parsing, sequential execution, parallel groups, context output propagation, AC resolution (wildcard and specific), Setup/Teardown lifecycle, and error reporting.
+
+### Go unit tests
+
+```bash
+go test ./pkg/testscenario/...
+```
+
+Includes `TestParseScenario_runnerCoreDogfood` which parses the actual dogfood scenario and verifies all steps, nested code fences, and Setup/Teardown are parsed correctly.
+
+### Dogfood scenario
+
+```bash
+# Run the self-test
+rehearse run spec/features/testing-framework/test-runner/_tests/runner-core.md
+
+# JSON output for CI
+rehearse run spec/features/testing-framework/test-runner/_tests/runner-core.md --format json
+```
+
+Or during development via `go run`:
+
+```bash
+go run . run spec/features/testing-framework/test-runner/_tests/runner-core.md
+```
+
+### Demo scenarios (manual)
+
+Tagged `manual` — skipped in normal runs. Run directly to see the live progress reporter:
+
+```bash
+# 4-second sleep step — watch the real-time progress indicator
+rehearse run spec/features/testing-framework/test-runner/_tests/progress-demo.md
+
+# Step failure — shows how errors are reported live
+rehearse run spec/features/testing-framework/test-runner/_tests/error-demo.md
+```
+
+To include manual scenarios when running a directory:
+
+```bash
+rehearse run spec/features/testing-framework/test-runner/_tests/ --run-manual-tests
+```
+
 ## Acceptance Criteria
 
 | AC | Description | Status |

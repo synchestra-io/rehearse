@@ -103,6 +103,12 @@ The spec root directory name is configurable via the `--spec-root` flag (default
 
 The key insight: **Gherkin separates what from how** (Given/When/Then is the "what," step definitions are the "how"). Rehearse's format keeps them together in one file — the markdown describes the what, the code block is the how, and both are visible in the same document. This makes scenarios self-contained and auditable without jumping between files. And because code blocks support bash, Python, SQL, and Starlark, authors choose the right tool for each verification — shell commands for CLI checks, Python for data validation, SQL for schema and data state verification, Starlark for hermetic logic.
 
+## Self-Testing
+
+The testing framework tests itself. The [test runner](test-runner/README.md) includes a dogfood scenario that exercises its own parsing, execution, output propagation, and AC resolution capabilities. If the runner can execute a scenario that tests its own behavior, that is direct evidence of correctness.
+
+See the [test runner's Running the Self-Tests section](test-runner/README.md#running-the-self-tests) for commands to run the dogfood scenario and demo scenarios.
+
 ## Interaction with Other Features
 
 | Feature | Interaction |
