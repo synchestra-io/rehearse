@@ -192,3 +192,28 @@ func TestParseScenario_rejectsBareCodeFence(t *testing.T) {
 		t.Fatal("expected error for code block without language annotation")
 	}
 }
+
+func TestParseScenario_HTTPBlock(t *testing.T) {
+	input := `# Scenario: HTTP test
+
+**Description:** Tests http block parsing.
+
+## fetch-home
+
+` + "```http\nGET https://example.com/\nAccept: text/html\n```" + `
+`
+	s, err := ParseScenario([]byte(input))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(s.Steps) != 1 {
+		t.Fatalf("expected 1 step, got %d", len(s.Steps))
+	}
+	step := s.Steps[0]
+	if step.Language != "http" {
+		t.Errorf("expected language=http, got %q", step.Language)
+	}
+	if step.Code == "" {
+		t.Error("expected non-empty code")
+	}
+}

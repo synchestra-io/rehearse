@@ -355,10 +355,10 @@ func extractCodeBlockFromLines(lines []string, startIdx int) (code, language str
 
 	// Validate language.
 	switch lang {
-	case "bash", "python", "sql", "starlark":
+	case "bash", "python", "sql", "starlark", "http":
 		// OK
 	default:
-		return "", "", fmt.Errorf("unsupported language annotation %q (supported: bash, python, sql, starlark)", lang)
+		return "", "", fmt.Errorf("unsupported language annotation %q (supported: bash, python, sql, starlark, http)", lang)
 	}
 
 	// Collect lines until closing fence with at least fenceLen backticks.
