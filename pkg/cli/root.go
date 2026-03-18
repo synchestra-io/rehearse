@@ -35,6 +35,7 @@ func Run(
 	rootCmd.AddCommand(
 		RunCommand(),
 		ListCommand(),
+		ValidateCommand(),
 		versionCommand(),
 	)
 
