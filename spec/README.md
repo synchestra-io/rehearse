@@ -4,9 +4,10 @@ Technical specification for the Rehearse test framework.
 
 ## Contents
 
-| Directory | Description |
+| Path | Description |
 |---|---|
 | [features](features/README.md) | Feature specifications for Rehearse |
+| [conventions](conventions.md) | File naming and directory conventions |
 
 ## Outstanding Questions
 

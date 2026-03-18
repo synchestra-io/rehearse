@@ -25,7 +25,7 @@ Each feature defines its acceptance criteria in an `_acs/` subdirectory:
 ```
 spec/features/{feature}/_acs/
   README.md             ← AC index for this feature
-  {ac-slug}.md          ← individual AC
+  {ac-slug}.ac.md       ← individual AC (see [conventions](../../conventions.md))
 ```
 
 The `_acs/` directory uses the reserved `_` prefix convention — it is not a sub-feature and is excluded from the feature index and Contents table.
@@ -92,8 +92,8 @@ ACs are identified by their feature path and slug — the same pattern used for 
 
 | AC path | Identifier |
 |---|---|
-| `spec/features/cli/project/new/_acs/creates-spec-config.md` | `cli/project/new/creates-spec-config` |
-| `spec/features/cli/project/remove/_acs/not-in-list.md` | `cli/project/remove/not-in-list` |
+| `spec/features/cli/project/new/_acs/creates-spec-config.ac.md` | `cli/project/new/creates-spec-config` |
+| `spec/features/cli/project/remove/_acs/not-in-list.ac.md` | `cli/project/remove/not-in-list` |
 
 This path-based ID is used in test scenario references, CLI output, and reporting.
 
