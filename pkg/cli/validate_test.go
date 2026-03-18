@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -210,5 +211,55 @@ func TestValidateCommand_invalidACFile(t *testing.T) {
 		if ce.Code != 1 {
 			t.Errorf("expected exit code 1, got %d", ce.Code)
 		}
+	}
+}
+
+func TestValidateCommand_failFastDefault(t *testing.T) {
+	dir := t.TempDir()
+	// Create 3 bad files.
+	for _, name := range []string{"a.test.md", "b.test.md", "c.test.md"} {
+		os.WriteFile(filepath.Join(dir, name), []byte("no title\n"), 0o644)
+	}
+
+	// --fail-fast without value → limit 1
+	cmd := ValidateCommand()
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&bytes.Buffer{})
+	cmd.SetArgs([]string{dir, "--fail-fast"})
+	err := cmd.Execute()
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	output := buf.String()
+	if !strings.Contains(output, "--fail-fast") {
+		t.Errorf("expected truncation note, got: %s", output)
+	}
+}
+
+func TestValidateCommand_failFastWithValue(t *testing.T) {
+	dir := t.TempDir()
+	for _, name := range []string{"a.test.md", "b.test.md", "c.test.md"} {
+		os.WriteFile(filepath.Join(dir, name), []byte("no title\n"), 0o644)
+	}
+
+	// --fail-fast=2 → limit 2
+	cmd := ValidateCommand()
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&bytes.Buffer{})
+	cmd.SetArgs([]string{dir, "--fail-fast=2"})
+	err := cmd.Execute()
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if ce, ok := err.(*CommandError); ok {
+		if ce.Code != 1 {
+			t.Errorf("expected exit code 1, got %d", ce.Code)
+		}
+	}
+	output := buf.String()
+	if !strings.Contains(output, "--fail-fast") {
+		t.Errorf("expected truncation note, got: %s", output)
 	}
 }

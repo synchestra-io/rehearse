@@ -24,6 +24,8 @@ without executing any code. Checks include:
 		RunE: runValidate,
 	}
 	cmd.Flags().String("spec-root", "", "spec root directory for cross-reference resolution")
+	cmd.Flags().Int("fail-fast", 0, "stop after N errors (default 1 when flag used without value)")
+	cmd.Flags().Lookup("fail-fast").NoOptDefVal = "1"
 	return cmd
 }
 
@@ -32,6 +34,7 @@ func runValidate(cmd *cobra.Command, args []string) error {
 	if specRoot == "" {
 		specRoot = "spec"
 	}
+	maxErrors, _ := cmd.Flags().GetInt("fail-fast")
 
 	target := "."
 	if len(args) > 0 {
@@ -45,7 +48,7 @@ func runValidate(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	result, err := testscenario.ValidateAll(target, specRoot)
+	result, err := testscenario.ValidateAll(target, specRoot, maxErrors)
 	if err != nil {
 		return &CommandError{
 			Err:  err,

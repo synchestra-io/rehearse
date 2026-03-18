@@ -498,6 +498,58 @@ echo "Invalid arguments correctly returned exit 2"
 echo "$output"
 ````
 
+## validate-fail-fast
+
+**ACs:**
+
+| Feature | ACs |
+|---|---|
+| [cli/validate]($SPEC_ROOT/features/cli/validate/) | [fail-fast-stops-early]($SPEC_ROOT/features/cli/validate/_acs/fail-fast-stops-early.ac.md) |
+
+````bash
+# The fixture dir contains multiple bad files (malformed-scenario.test.md, bad-ac.ac.md, etc.)
+# Without --fail-fast, all errors are collected
+all_output=$("$BINARY_PATH" validate "$FIXTURE_DIR" --spec-root "$FIXTURE_DIR" 2>&1)
+all_rc=$?
+test $all_rc -eq 1 || {
+  echo "Expected exit 1 without --fail-fast, got $all_rc"
+  echo "$all_output"
+  exit 1
+}
+
+# Count errors without --fail-fast
+all_error_lines=$(echo "$all_output" | grep -cE '^\s+(line [0-9]+:|[a-z])' || true)
+echo "Errors without --fail-fast: $all_error_lines"
+
+# With --fail-fast=1, output should be truncated
+ff_output=$("$BINARY_PATH" validate "$FIXTURE_DIR" --spec-root "$FIXTURE_DIR" --fail-fast 2>&1)
+ff_rc=$?
+test $ff_rc -eq 1 || {
+  echo "Expected exit 1 with --fail-fast, got $ff_rc"
+  echo "$ff_output"
+  exit 1
+}
+
+# Must contain truncation note
+echo "$ff_output" | grep -q "fail-fast" || {
+  echo "Expected truncation note in output"
+  echo "$ff_output"
+  exit 1
+}
+
+# Fewer error lines than full run
+ff_error_lines=$(echo "$ff_output" | grep -cE '^\s+(line [0-9]+:|[a-z])' || true)
+echo "Errors with --fail-fast: $ff_error_lines"
+
+test "$ff_error_lines" -lt "$all_error_lines" || {
+  echo "Expected fewer errors with --fail-fast ($ff_error_lines) than without ($all_error_lines)"
+  exit 1
+}
+
+echo "Fail-fast correctly truncated output"
+echo "$ff_output"
+````
+
 ## Teardown
 
 ````bash

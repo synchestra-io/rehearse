@@ -26,6 +26,7 @@ type ValidationResult struct {
 	Errors         []ValidationError
 	ScenariosCount int
 	ACsCount       int
+	Truncated      bool // true if error collection was stopped early by maxErrors
 }
 
 // HasErrors returns true if any validation errors were found.
@@ -38,10 +39,45 @@ func (r *ValidationResult) addError(file string, line int, msg string) {
 	r.Errors = append(r.Errors, ValidationError{File: file, Line: line, Message: msg})
 }
 
+// appendErrors adds errors up to the maxErrors limit (0 = unlimited).
+// Sets Truncated when the limit is reached.
+func (r *ValidationResult) appendErrors(errs []ValidationError, maxErrors int) {
+	if maxErrors <= 0 {
+		r.Errors = append(r.Errors, errs...)
+		return
+	}
+	remaining := maxErrors - len(r.Errors)
+	if remaining <= 0 {
+		r.Truncated = true
+		return
+	}
+	if len(errs) <= remaining {
+		r.Errors = append(r.Errors, errs...)
+	} else {
+		r.Errors = append(r.Errors, errs[:remaining]...)
+		r.Truncated = true
+	}
+}
+
+// reachedLimit returns true if maxErrors > 0 and the error count has reached it.
+// Also sets Truncated to true when the limit is reached.
+func (r *ValidationResult) reachedLimit(maxErrors int) bool {
+	if maxErrors > 0 && len(r.Errors) >= maxErrors {
+		r.Truncated = true
+		return true
+	}
+	return false
+}
+
+// errLimitReached is a sentinel used to stop filepath.Walk early.
+var errLimitReached = fmt.Errorf("error limit reached")
+
 // ValidateAll discovers and validates all scenario and AC files under path.
 // If path is a file, validates that single file.
 // If path is a directory, recursively discovers .test.md and .ac.md files.
-func ValidateAll(path, specRoot string) (*ValidationResult, error) {
+// maxErrors limits the total number of errors collected; 0 means unlimited.
+// When the limit is reached, validation stops and Truncated is set to true.
+func ValidateAll(path, specRoot string, maxErrors int) (*ValidationResult, error) {
 	result := &ValidationResult{}
 
 	info, err := os.Stat(path)
@@ -54,11 +90,11 @@ func ValidateAll(path, specRoot string) (*ValidationResult, error) {
 		if strings.HasSuffix(path, ".test.md") {
 			result.ScenariosCount++
 			errs := ValidateScenarioFile(path, specRoot)
-			result.Errors = append(result.Errors, errs...)
+			result.appendErrors(errs, maxErrors)
 		} else if strings.HasSuffix(path, ".ac.md") {
 			result.ACsCount++
 			errs := ValidateACFile(path)
-			result.Errors = append(result.Errors, errs...)
+			result.appendErrors(errs, maxErrors)
 		}
 		return result, nil
 	}
@@ -68,25 +104,35 @@ func ValidateAll(path, specRoot string) (*ValidationResult, error) {
 		if walkErr != nil || fi.IsDir() {
 			return nil
 		}
+		if result.reachedLimit(maxErrors) {
+			return errLimitReached
+		}
 		if strings.HasSuffix(p, ".test.md") {
 			result.ScenariosCount++
 			errs := ValidateScenarioFile(p, specRoot)
-			result.Errors = append(result.Errors, errs...)
+			result.appendErrors(errs, maxErrors)
 		} else if strings.HasSuffix(p, ".ac.md") {
 			result.ACsCount++
 			errs := ValidateACFile(p)
-			result.Errors = append(result.Errors, errs...)
+			result.appendErrors(errs, maxErrors)
 		}
 		return nil
 	})
+
+	if result.reachedLimit(maxErrors) {
+		return result, nil
+	}
 
 	// Validate AC index synchronization for every _acs/ directory found.
 	_ = filepath.Walk(path, func(p string, fi os.FileInfo, walkErr error) error {
 		if walkErr != nil || !fi.IsDir() || fi.Name() != "_acs" {
 			return nil
 		}
+		if result.reachedLimit(maxErrors) {
+			return errLimitReached
+		}
 		errs := ValidateACIndex(p)
-		result.Errors = append(result.Errors, errs...)
+		result.appendErrors(errs, maxErrors)
 		return nil
 	})
 
@@ -564,5 +610,8 @@ func FormatValidationResult(result *ValidationResult) string {
 	}
 
 	sb.WriteString(fmt.Sprintf("%d files, %d errors\n", len(fileOrder), len(result.Errors)))
+	if result.Truncated {
+		sb.WriteString("(output truncated due to --fail-fast)\n")
+	}
 	return sb.String()
 }

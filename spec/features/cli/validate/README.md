@@ -20,6 +20,8 @@ Validation should happen earlier: at authoring time, in CI as a pre-check, or as
 rehearse validate [path]              — validate scenario/AC files at path
 rehearse validate                     — validate all scenarios and ACs under spec root
 rehearse validate --spec-root ./spec  — override spec root directory
+rehearse validate --fail-fast         — stop after the first error
+rehearse validate --fail-fast=5       — stop after 5 errors
 ```
 
 When `path` is a file, validate checks that single file. When `path` is a directory, validate recursively discovers and checks all `.test.md` and `.ac.md` files under it. When no path is given, validate scans the entire spec root.
@@ -29,6 +31,7 @@ When `path` is a file, validate checks that single file. When `path` is a direct
 | Flag | Default | Description |
 |---|---|---|
 | `--spec-root` | `spec` | Override the spec root directory |
+| `--fail-fast[=N]` | `0` (disabled) | Stop after N errors. When used without a value, defaults to 1. When set to 0 or omitted, all errors are collected. |
 
 ### Checks performed
 
@@ -80,6 +83,20 @@ Validates that `_acs/` directories and their `README.md` index files are in sync
 - **Does not execute verification scripts or test steps.** Validate is purely structural — it reads markdown, not bash.
 - **Does not check feature READMEs for AC sections.** Enforcing `## Acceptance Criteria` in feature READMEs is Synchestra's responsibility, not the validate command's.
 - **Does not validate the semantic correctness of scripts.** Whether a bash script would succeed, a SQL query would parse, or a Python expression would evaluate is out of scope. Validate checks that the code block exists and has a language annotation — not that its contents are correct.
+
+### Fail-fast mode
+
+By default, validate collects all errors across all files before reporting. This gives a complete picture but may be slow on large trees with many structural problems.
+
+When `--fail-fast` is used, validate stops as soon as the error limit is reached:
+
+- `--fail-fast` — stop after the first error (equivalent to `--fail-fast=1`).
+- `--fail-fast=N` — stop after N errors.
+- `--fail-fast=0` — same as omitting the flag; collect all errors.
+
+When validation is truncated, the output includes a note: `(output truncated due to --fail-fast)`. The exit code is still `1` — truncation does not change the exit code contract.
+
+Fail-fast applies at the file boundary: errors within a single file are always fully collected, but no further files are processed once the limit is reached.
 
 ### Output
 
@@ -134,6 +151,7 @@ Validated 12 scenarios, 34 ACs — no errors.
 | [exit-0-all-valid](_acs/exit-0-all-valid.ac.md) | Exits 0 when all checks pass | planned |
 | [exit-1-validation-errors](_acs/exit-1-validation-errors.ac.md) | Exits 1 when validation errors are found | planned |
 | [exit-2-invalid-args](_acs/exit-2-invalid-args.ac.md) | Exits 2 on invalid arguments | planned |
+| [fail-fast-stops-early](_acs/fail-fast-stops-early.ac.md) | --fail-fast stops validation after the error limit is reached | planned |
 
 ## Outstanding Questions
 

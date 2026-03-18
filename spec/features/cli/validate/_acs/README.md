@@ -12,6 +12,7 @@ Acceptance criteria for [`rehearse validate`](../README.md).
 | [exit-0-all-valid](exit-0-all-valid.ac.md) | Exits 0 when all checks pass | planned |
 | [exit-1-validation-errors](exit-1-validation-errors.ac.md) | Exits 1 when validation errors are found | planned |
 | [exit-2-invalid-args](exit-2-invalid-args.ac.md) | Exits 2 on invalid arguments | planned |
+| [fail-fast-stops-early](fail-fast-stops-early.ac.md) | --fail-fast stops validation after the error limit is reached | planned |
 
 ## Outstanding Questions
 

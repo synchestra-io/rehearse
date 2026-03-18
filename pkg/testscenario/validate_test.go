@@ -470,7 +470,7 @@ None.
 `
 	os.WriteFile(filepath.Join(acsDir, "README.md"), []byte(readme), 0o644)
 
-	result, err := ValidateAll(dir, "")
+	result, err := ValidateAll(dir, "", 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -497,7 +497,7 @@ func TestValidateAll_singleFile(t *testing.T) {
 ` + "```bash\necho ok\n```\n"
 	os.WriteFile(f, []byte(content), 0o644)
 
-	result, err := ValidateAll(f, "")
+	result, err := ValidateAll(f, "", 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -510,7 +510,7 @@ func TestValidateAll_singleFile(t *testing.T) {
 }
 
 func TestValidateAll_pathNotFound(t *testing.T) {
-	_, err := ValidateAll("/nonexistent/path", "")
+	_, err := ValidateAll("/nonexistent/path", "", 0)
 	if err == nil {
 		t.Error("expected error for non-existent path")
 	}
@@ -542,5 +542,55 @@ func TestFormatValidationResult_withErrors(t *testing.T) {
 	}
 	if !strings.Contains(output, "3 errors") {
 		t.Errorf("expected error count in output: %s", output)
+	}
+}
+
+func TestValidateAll_failFast_stopsEarly(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create multiple bad files so there are many potential errors.
+	for _, name := range []string{"a.test.md", "b.test.md", "c.test.md"} {
+		os.WriteFile(filepath.Join(dir, name), []byte("no title here\n"), 0o644)
+	}
+
+	// Without limit: collects all.
+	all, _ := ValidateAll(dir, "", 0)
+	if len(all.Errors) < 3 {
+		t.Fatalf("expected at least 3 errors without limit, got %d", len(all.Errors))
+	}
+	if all.Truncated {
+		t.Error("should not be truncated without limit")
+	}
+
+	// With limit=1: stops after 1 error.
+	limited, _ := ValidateAll(dir, "", 1)
+	if len(limited.Errors) != 1 {
+		t.Errorf("expected 1 error with --fail-fast=1, got %d", len(limited.Errors))
+	}
+	if !limited.Truncated {
+		t.Error("expected Truncated=true with --fail-fast=1")
+	}
+
+	// With limit=2: stops after 2.
+	limited2, _ := ValidateAll(dir, "", 2)
+	if len(limited2.Errors) != 2 {
+		t.Errorf("expected 2 errors with --fail-fast=2, got %d", len(limited2.Errors))
+	}
+	if !limited2.Truncated {
+		t.Error("expected Truncated=true with --fail-fast=2")
+	}
+}
+
+func TestFormatValidationResult_truncated(t *testing.T) {
+	result := &ValidationResult{
+		ScenariosCount: 5,
+		Truncated:      true,
+		Errors: []ValidationError{
+			{File: "a.test.md", Line: 1, Message: "error"},
+		},
+	}
+	output := FormatValidationResult(result)
+	if !strings.Contains(output, "--fail-fast") {
+		t.Errorf("expected truncation note in output: %s", output)
 	}
 }
