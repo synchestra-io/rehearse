@@ -37,10 +37,10 @@ func (r *ACResolver) resolveAll(acsDir string) ([]ACFile, error) {
 	}
 	var slugs []string
 	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") || e.Name() == "README.md" {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".ac.md") {
 			continue
 		}
-		slugs = append(slugs, strings.TrimSuffix(e.Name(), ".md"))
+		slugs = append(slugs, strings.TrimSuffix(e.Name(), ".ac.md"))
 	}
 	sort.Strings(slugs)
 	var acs []ACFile
@@ -73,7 +73,7 @@ func (r *ACResolver) resolveSpecific(acsDir, selector string) ([]ACFile, error) 
 }
 
 func (r *ACResolver) readACFile(acsDir, slug string) (ACFile, error) {
-	path := filepath.Join(acsDir, slug+".md")
+	path := filepath.Join(acsDir, slug+".ac.md")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return ACFile{}, fmt.Errorf("reading AC file %s: %w", path, err)

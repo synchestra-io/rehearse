@@ -132,8 +132,8 @@ When ACs are defined:
 
 | AC | Description | Status |
 |---|---|---|
-| [creates-spec-config](_acs/creates-spec-config.md) | config file created in spec repo | implemented |
-| [creates-state-config](_acs/creates-state-config.md) | config file created in state repo | implemented |
+| [creates-spec-config](_acs/creates-spec-config.ac.md) | config file created in spec repo | implemented |
+| [creates-state-config](_acs/creates-state-config.ac.md) | config file created in state repo | implemented |
 ```
 
 When no ACs are defined yet:
@@ -149,8 +149,8 @@ Not defined yet.
 Validation tooling (lint/pre-commit) enforces consistency:
 
 1. Every feature README has an `## Acceptance Criteria` section
-2. Every `.md` file in `_acs/` (except README.md) is listed in the feature README AC table
-3. Every entry in the feature README AC table has a corresponding `.md` file in `_acs/`
+2. Every `.ac.md` file in `_acs/` is listed in the feature README AC table
+3. Every entry in the feature README AC table has a corresponding `.ac.md` file in `_acs/`
 4. AC slugs are lowercase, hyphen-separated, and unique within the feature
 
 These rules keep the AC index and the actual files in sync — no phantom entries, no orphaned files.

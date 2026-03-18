@@ -167,7 +167,7 @@ Steps declare which acceptance criteria to verify after execution:
 | Feature | ACs |
 |---|---|
 | [cli/project/remove](spec/features/cli/project/remove/) | * |
-| [cli/project/list](spec/features/cli/project/list/) | [in-list](spec/features/cli/project/list/_acs/in-list.md) |
+| [cli/project/list](spec/features/cli/project/list/) | [in-list](spec/features/cli/project/list/_acs/in-list.ac.md) |
 ```
 
 | Pattern | Meaning |

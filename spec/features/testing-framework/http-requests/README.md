@@ -172,11 +172,11 @@ Content-Type: application/json
 
 | AC | Description | Status |
 |---|---|---|
-| [substitutes-context-vars](_acs/substitutes-context-vars.md) | context and env vars are resolved in method line, headers, and body before the request is sent | planned |
-| [stores-response-to-context](_acs/stores-response-to-context.md) | response object (status, headers, body, json) is stored in context.response by default | planned |
-| [custom-response-name](_acs/custom-response-name.md) | when Outputs table is present, response is stored under declared names and default context.response is suppressed | planned |
-| [network-error-fails-step](_acs/network-error-fails-step.md) | network errors (unreachable host, timeout) fail the step; non-2xx responses do not | planned |
-| [parses-http-block-format](_acs/parses-http-block-format.md) | runner correctly parses method, url, headers, and body from http code block | planned |
+| [substitutes-context-vars](_acs/substitutes-context-vars.ac.md) | context and env vars are resolved in method line, headers, and body before the request is sent | planned |
+| [stores-response-to-context](_acs/stores-response-to-context.ac.md) | response object (status, headers, body, json) is stored in context.response by default | planned |
+| [custom-response-name](_acs/custom-response-name.ac.md) | when Outputs table is present, response is stored under declared names and default context.response is suppressed | planned |
+| [network-error-fails-step](_acs/network-error-fails-step.ac.md) | network errors (unreachable host, timeout) fail the step; non-2xx responses do not | planned |
+| [parses-http-block-format](_acs/parses-http-block-format.ac.md) | runner correctly parses method, url, headers, and body from http code block | planned |
 
 ## Outstanding Questions
 

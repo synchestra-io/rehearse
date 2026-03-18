@@ -13,7 +13,7 @@ func writeACFile(t *testing.T, dir, slug, content string) {
 	if err := os.MkdirAll(acsDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(acsDir, slug+".md"), []byte(content), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(acsDir, slug+".ac.md"), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
 }

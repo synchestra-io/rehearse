@@ -23,7 +23,7 @@ pkg/testscenario/
   types.go          — Scenario, Step, Output, ACRef, ACFile structs
   parser.go         — Markdown → Scenario struct parser
   context.go        — Execution context: context/step output storage, variable resolution
-  ac.go             — AC file parser + resolver (reads _acs/*.md, extracts verification scripts)
+  ac.go             — AC file parser + resolver (reads _acs/*.ac.md, extracts verification scripts)
   runner.go         — Step executor: sequential/parallel, shell execution, output capture
   include.go        — Sub-flow resolution and cycle detection
   reporter.go       — Result formatting (text, JSON, future: TAP/JUnit)
@@ -47,8 +47,8 @@ Parse errors include line numbers — when a scenario fails to parse, the author
 
 When a step declares AC references, the runner resolves them against the filesystem:
 
-1. **Wildcard (`*`):** Read all `.md` files (except README.md) from `{spec_root}/features/{feature}/_acs/`. Execute in alphabetical order by slug.
-2. **Specific ACs:** Resolve each named AC to its `.md` file. Execute in the order listed in the table.
+1. **Wildcard (`*`):** Read all `.ac.md` files from `{spec_root}/features/{feature}/_acs/`. Execute in alphabetical order by slug.
+2. **Specific ACs:** Resolve each named AC to its `.ac.md` file. Execute in the order listed in the table.
 
 For each resolved AC file:
 1. Parse the markdown to extract the Inputs table and Verification script
@@ -191,7 +191,7 @@ If the runner can successfully parse and execute a scenario that tests its own p
 
 ## Running the Self-Tests
 
-The runner's dogfood scenario lives at `spec/features/testing-framework/test-runner/_tests/runner-core.md`. It exercises parsing, sequential execution, parallel groups, context output propagation, AC resolution (wildcard and specific), Setup/Teardown lifecycle, and error reporting.
+The runner's dogfood scenario lives at `spec/features/testing-framework/test-runner/_tests/runner-core.test.md`. It exercises parsing, sequential execution, parallel groups, context output propagation, AC resolution (wildcard and specific), Setup/Teardown lifecycle, and error reporting.
 
 ### Go unit tests
 
@@ -205,16 +205,16 @@ Includes `TestParseScenario_runnerCoreDogfood` which parses the actual dogfood s
 
 ```bash
 # Run the self-test
-rehearse run spec/features/testing-framework/test-runner/_tests/runner-core.md
+rehearse run spec/features/testing-framework/test-runner/_tests/runner-core.test.md
 
 # JSON output for CI
-rehearse run spec/features/testing-framework/test-runner/_tests/runner-core.md --format json
+rehearse run spec/features/testing-framework/test-runner/_tests/runner-core.test.md --format json
 ```
 
 Or during development via `go run`:
 
 ```bash
-go run . run spec/features/testing-framework/test-runner/_tests/runner-core.md
+go run . run spec/features/testing-framework/test-runner/_tests/runner-core.test.md
 ```
 
 ### Demo scenarios (manual)
@@ -223,10 +223,10 @@ Tagged `manual` — skipped in normal runs. Run directly to see the live progres
 
 ```bash
 # 4-second sleep step — watch the real-time progress indicator
-rehearse run spec/features/testing-framework/test-runner/_tests/progress-demo.md
+rehearse run spec/features/testing-framework/test-runner/_tests/progress-demo.test.md
 
 # Step failure — shows how errors are reported live
-rehearse run spec/features/testing-framework/test-runner/_tests/error-demo.md
+rehearse run spec/features/testing-framework/test-runner/_tests/error-demo.test.md
 ```
 
 To include manual scenarios when running a directory:
@@ -239,17 +239,17 @@ rehearse run spec/features/testing-framework/test-runner/_tests/ --run-manual-te
 
 | AC | Description | Status |
 |---|---|---|
-| [parses-valid-scenario](_acs/parses-valid-scenario.md) | Valid scenario file parsed into structured result | planned |
-| [rejects-malformed-scenario](_acs/rejects-malformed-scenario.md) | Malformed scenario rejected with line-number error | planned |
-| [executes-sequential-steps](_acs/executes-sequential-steps.md) | Steps execute in file order by default | planned |
-| [executes-parallel-group](_acs/executes-parallel-group.md) | Consecutive Parallel: true steps run concurrently | planned |
-| [resolves-ac-wildcard](_acs/resolves-ac-wildcard.md) | Wildcard (*) resolves all ACs in feature _acs/ directory | planned |
-| [resolves-ac-specific](_acs/resolves-ac-specific.md) | Named AC references resolve to correct _acs/ files | planned |
-| [runs-setup-before-steps](_acs/runs-setup-before-steps.md) | Setup block runs before all steps | planned |
-| [runs-teardown-on-failure](_acs/runs-teardown-on-failure.md) | Teardown runs even when steps fail | planned |
-| [propagates-context-outputs](_acs/propagates-context-outputs.md) | Context-scoped outputs accessible to subsequent steps | planned |
-| [reports-pass-fail-exit-code](_acs/reports-pass-fail-exit-code.md) | Exit 0 on all pass, non-zero on any failure | planned |
-| [detects-include-cycles](_acs/detects-include-cycles.md) | Circular includes rejected at validation | planned |
+| [parses-valid-scenario](_acs/parses-valid-scenario.ac.md) | Valid scenario file parsed into structured result | planned |
+| [rejects-malformed-scenario](_acs/rejects-malformed-scenario.ac.md) | Malformed scenario rejected with line-number error | planned |
+| [executes-sequential-steps](_acs/executes-sequential-steps.ac.md) | Steps execute in file order by default | planned |
+| [executes-parallel-group](_acs/executes-parallel-group.ac.md) | Consecutive Parallel: true steps run concurrently | planned |
+| [resolves-ac-wildcard](_acs/resolves-ac-wildcard.ac.md) | Wildcard (*) resolves all ACs in feature _acs/ directory | planned |
+| [resolves-ac-specific](_acs/resolves-ac-specific.ac.md) | Named AC references resolve to correct _acs/ files | planned |
+| [runs-setup-before-steps](_acs/runs-setup-before-steps.ac.md) | Setup block runs before all steps | planned |
+| [runs-teardown-on-failure](_acs/runs-teardown-on-failure.ac.md) | Teardown runs even when steps fail | planned |
+| [propagates-context-outputs](_acs/propagates-context-outputs.ac.md) | Context-scoped outputs accessible to subsequent steps | planned |
+| [reports-pass-fail-exit-code](_acs/reports-pass-fail-exit-code.ac.md) | Exit 0 on all pass, non-zero on any failure | planned |
+| [detects-include-cycles](_acs/detects-include-cycles.ac.md) | Circular includes rejected at validation | planned |
 
 ## Outstanding Questions
 

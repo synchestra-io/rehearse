@@ -212,7 +212,7 @@ func TestRunner_acInputValidation(t *testing.T) {
 echo "$MISSING_VAR"
 ` + "```" + `
 `
-	if err := os.WriteFile(filepath.Join(acDir, "needs-input.md"), []byte(acContent), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(acDir, "needs-input.ac.md"), []byte(acContent), 0644); err != nil {
 		t.Fatal(err)
 	}
 
