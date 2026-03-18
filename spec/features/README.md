@@ -8,7 +8,7 @@ Feature specifications for the Rehearse test framework, managed by [Synchestra](
 |---|---|---|
 | [testing-framework](testing-framework/README.md) | Conceptual | Markdown-native testing framework: scenario format, Go-based runner, and CLI integration for composing ACs into E2E and integration test flows |
 | [acceptance-criteria](acceptance-criteria/README.md) | Conceptual | First-class, individually addressable verification artifacts with status lifecycle, typed inputs, and executable verification scripts |
-| [cli](cli/README.md) | In Progress | The `rehearse` CLI — primary interface for running and listing test scenarios |
+| [cli](cli/README.md) | In Progress | The `rehearse` CLI — primary interface for running, listing, and validating test scenarios |
 
 ## Feature Summaries
 
@@ -22,7 +22,7 @@ The contract between what a feature promises and what the system delivers. Each 
 
 ### [CLI](cli/README.md)
 
-The `rehearse` command-line interface. Follows a `rehearse <action>` pattern for running and listing test scenarios with consistent exit codes and structured output formats.
+The `rehearse` command-line interface. Follows a `rehearse <action>` pattern with consistent exit codes and structured output formats. Contains four sub-commands: [run](cli/run/README.md) executes test scenarios, [list](cli/list/README.md) discovers and lists available scenarios, [validate](cli/validate/README.md) checks structural validity of scenarios and ACs without execution, and [version](cli/version/README.md) prints build information.
 
 ## Outstanding Questions
 

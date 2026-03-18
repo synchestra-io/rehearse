@@ -4,7 +4,32 @@
 
 ## Summary
 
-The Rehearse CLI (`rehearse`) is the primary interface for running and managing markdown-native test scenarios. It provides commands for executing scenarios, listing available tests, and producing structured output for both humans and CI pipelines.
+The Rehearse CLI (`rehearse`) is the primary interface for running and managing markdown-native test scenarios. It provides commands for executing scenarios, listing available tests, validating spec artifacts, and producing structured output for both humans and CI pipelines.
+
+## Contents
+
+| Command | Description |
+|---|---|
+| [run](run/README.md) | Execute test scenario files or directories |
+| [list](list/README.md) | List available test scenarios without executing them |
+| [validate](validate/README.md) | Check structural validity of scenarios and ACs without execution |
+| [version](version/README.md) | Print version information |
+
+### run
+
+Executes one or more test scenarios. Accepts a file path (single scenario) or directory path (all scenarios, recursive). Supports tag filtering, JSON output, manual scenario inclusion, and configurable spec root. See [run/README.md](run/README.md).
+
+### list
+
+Lists available scenarios without executing them. Discovers scenarios from `spec/tests/` and `spec/features/*/_tests/` directories. Supports tag filtering. See [list/README.md](list/README.md).
+
+### validate
+
+Checks the structural validity of test scenarios and acceptance criteria files without executing any code. Catches format errors, missing references, and orphaned files before runtime. See [validate/README.md](validate/README.md).
+
+### version
+
+Prints the Rehearse version, Go version, and build metadata. See [version/README.md](version/README.md).
 
 ## Design Principles
 
@@ -15,6 +40,7 @@ Commands follow a `rehearse <action>` pattern:
 ```
 rehearse run [path]       — run scenario file or directory
 rehearse list             — list available scenarios
+rehearse validate [path]  — validate scenarios and ACs
 rehearse version          — print version information
 ```
 
@@ -24,65 +50,31 @@ All commands share a consistent exit code contract:
 
 | Exit code | Meaning |
 |---|---|
-| `0` | Success (all scenarios/steps passed) |
-| `1` | Test failure (one or more scenarios/steps failed) |
+| `0` | Success |
+| `1` | Failure (test failure for `run`, validation errors for `validate`) |
 | `2` | Invalid arguments |
-| `3` | Resource not found (scenario file or directory does not exist) |
+| `3` | Resource not found (path does not exist) |
 | `10+` | Unexpected errors |
 
-## Behavior
-
-### `rehearse run`
-
-Executes one or more test scenarios. Accepts a file path (single scenario) or directory path (all scenarios in directory, recursive).
-
-```
-rehearse run [path]                  — run scenario file or directory
-rehearse run --tag e2e               — filter by tag
-rehearse run --format json           — machine-readable output
-rehearse run --run-manual-tests      — include scenarios tagged 'manual'
-rehearse run --spec-root ./my-spec   — override spec root directory
-```
-
-| Flag | Default | Description |
-|---|---|---|
-| `--format` | `text` | Output format: `text` (styled with live progress) or `json` |
-| `--spec-root` | `spec` | Override the spec root directory for AC resolution |
-| `--tag` | | Filter scenarios by tag (repeatable) |
-| `--run-manual-tests` | `false` | Include scenarios tagged `manual` in directory scans |
-
-When no path is given, defaults to scanning the current directory.
-
-Scenarios tagged `manual` are skipped during directory scans unless `--run-manual-tests` is set, but always run when a specific file path is passed directly.
-
-### `rehearse list`
-
-Lists available scenarios without executing them.
-
-```
-rehearse list              — list all scenarios in current directory
-rehearse list --tag e2e    — list filtered by tag
-```
-
-Output includes scenario name, file path, tags, and step count.
-
-### `rehearse version`
-
-Prints the Rehearse version, Go version, and build metadata.
+Individual commands may use a subset of these codes. See each command's spec for details.
 
 ## Interaction with Other Features
 
 | Feature | Interaction |
 |---|---|
 | [Testing Framework](../testing-framework/README.md) | CLI is the user-facing entry point for the testing framework. `run` and `list` delegate to the test runner. |
-| [Test Runner](../testing-framework/test-runner/README.md) | `rehearse run` instantiates the runner, passes configuration, and formats output. |
+| [Test Runner](../testing-framework/test-runner/README.md) | `rehearse run` instantiates the runner; `rehearse validate` shares parsing logic. |
+| [Acceptance Criteria](../acceptance-criteria/README.md) | `rehearse validate` checks AC file structure and cross-references. |
 
 ## Acceptance Criteria
 
-Not defined yet.
+Acceptance criteria are defined at the per-command level. See each command's spec for its ACs:
+
+- [cli/run ACs](run/_acs/README.md) — 12 ACs
+- [cli/list ACs](list/_acs/README.md) — 2 ACs
+- [cli/validate ACs](validate/_acs/README.md) — 8 ACs
+- [cli/version ACs](version/_acs/README.md) — 1 AC
 
 ## Outstanding Questions
 
-- Acceptance criteria not yet defined for this feature.
-- Should `rehearse run` support a `--dry-run` flag that parses and validates scenarios without executing them?
-- Should there be a `rehearse init` command to scaffold a new spec directory with example scenarios?
+None at this time.
